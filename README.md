@@ -24,13 +24,19 @@
 
 ## 在线地址
 
-GitHub Pages：https://cyberbird2048.github.io/surf-day/
+- 正式：https://surf.wildfires.cc/（Cloudflare Pages，项目名 `surf-day`）
+- 备用：https://cyberbird2048.github.io/surf-day/（GitHub Pages）
 
 ## 怎么用 / 给朋友
 
 1. **在线打开**：直接访问上面的链接，手机浏览器里「添加到主屏幕」就是一个小程序
 2. **本地开**：双击 `index.html`（Safari/Chrome 均可），AirDrop 或微信发文件给朋友即可
 3. **自己部署**：仓库根目录就是站点内容，任意静态托管（GitHub Pages/Cloudflare Pages/Vercel）直接指向仓库根即可
+
+## 部署
+
+- Cloudflare Pages：`wrangler pages deploy . --project-name=surf-day`（在本仓库根目录下跑，需先 `wrangler login`）
+- GitHub Pages：push 到 `main` 分支自动重新发布
 
 ## 维护
 

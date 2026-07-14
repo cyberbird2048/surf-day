@@ -4,18 +4,61 @@
   "status": "active",
   "domain": "阿泽的创意空间",
   "type": "tool",
-  "milestone": "v6 从千万会 worktree 独立成项目，发布到 GitHub Pages 上线可用",
+  "milestone": "正式上线 surf.wildfires.cc（Cloudflare Pages 自定义域名）",
   "next": "视反馈迭代：潮位真正参与评分（v7）、分享卡片化增长动作",
   "deliverables": [
-    {"date": "2026-07-13", "title": "surf-day 独立仓库 + GitHub Pages 上线", "note": "https://cyberbird2048.github.io/surf-day/"}
+    {
+      "date": "2026-07-13",
+      "title": "surf-day 独立仓库 + GitHub Pages 上线",
+      "note": "https://cyberbird2048.github.io/surf-day/"
+    },
+    {
+      "date": "2026-07-14",
+      "title": "Cloudflare Pages 部署 + 自定义域名",
+      "note": "https://surf.wildfires.cc/ ，项目名 surf-day，本地跑 wrangler pages deploy 更新"
+    }
   ],
   "history": [
-    {"date": "2026-07-11", "milestone": "v1 浪报+选板 MVP，Open-Meteo 数据源"},
-    {"date": "2026-07-11", "milestone": "v2 接入实况摄像头与权威浪报外链（12 浪点逐一验证）"},
-    {"date": "2026-07-11", "milestone": "v3 国内浪点 5→11，全球组默认折叠，iSurf 直播指引"},
-    {"date": "2026-07-11", "milestone": "v4 两河口坐标改黄岛，按评分自动排序"},
-    {"date": "2026-07-12", "milestone": "v5 设计语言切换为「同一条曲线」VI v1.0"},
-    {"date": "2026-07-12", "milestone": "v6 选板双路线（长/短板）+ 系数校准 + 首启水平引导"},
-    {"date": "2026-07-13", "milestone": "从千万会 worktree 独立出来，建独立 GitHub 仓库并部署 GitHub Pages"}
-  ]
+    {
+      "date": "2026-07-11",
+      "milestone": "v1 浪报+选板 MVP，Open-Meteo 数据源"
+    },
+    {
+      "date": "2026-07-11",
+      "milestone": "v2 接入实况摄像头与权威浪报外链（12 浪点逐一验证）"
+    },
+    {
+      "date": "2026-07-11",
+      "milestone": "v3 国内浪点 5→11，全球组默认折叠，iSurf 直播指引"
+    },
+    {
+      "date": "2026-07-11",
+      "milestone": "v4 两河口坐标改黄岛，按评分自动排序"
+    },
+    {
+      "date": "2026-07-12",
+      "milestone": "v5 设计语言切换为「同一条曲线」VI v1.0"
+    },
+    {
+      "date": "2026-07-12",
+      "milestone": "v6 选板双路线（长/短板）+ 系数校准 + 首启水平引导"
+    },
+    {
+      "date": "2026-07-13",
+      "milestone": "从千万会 worktree 独立出来，建独立 GitHub 仓库并部署 GitHub Pages"
+    },
+    {
+      "date": "2026-07-14",
+      "milestone": "v6 从千万会 worktree 独立成项目，发布到 GitHub Pages 上线可用"
+    },
+    {
+      "date": "2026-07-14",
+      "milestone": "chore: 忽略 wrangler 本地缓存目录"
+    },
+    {
+      "date": "2026-07-14",
+      "milestone": "部署 Cloudflare Pages（项目 surf-day）并接入 surf.wildfires.cc 自定义域名"
+    }
+  ],
+  "last_active": "2026-07-14"
 }
