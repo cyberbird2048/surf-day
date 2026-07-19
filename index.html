@@ -101,6 +101,10 @@ button{font-family:inherit;border:none;background:none;color:inherit;cursor:poin
 .group summary h2{margin-bottom:8px}
 .fold-arrow{margin-left:auto;padding-left:8px;transition:.2s;color:var(--ink3)}
 .group details[open] .fold-arrow{transform:rotate(180deg)}
+.area-h{font-size:14px;font-weight:700;color:var(--ink);margin:14px 4px 8px}
+.area-more summary{font-size:13px;color:var(--ink2);text-align:center;padding:6px;cursor:pointer;list-style:none}
+.area-more summary::-webkit-details-marker{display:none}
+.camgo{font-size:12px;padding:3px 10px;border-radius:999px;background:var(--teal);color:#fff}
 
 /* ---------- detail overlay ---------- */
 #detail{position:fixed;inset:0;z-index:50;background:var(--paper);overflow-y:auto;transform:translateY(100%);
@@ -186,7 +190,6 @@ a.rlink .tx{flex:1;min-width:0}
 a.rlink .tx b{font-size:14px}
 a.rlink .tx div{font-size:11.5px;color:var(--ink2)}
 a.rlink .go{color:var(--teal);font-weight:800;flex:none}
-.camdot{font-size:12px;vertical-align:1px}
 
 /* ---------- me ---------- */
 .mcard{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px;margin:0 16px 14px}
@@ -215,6 +218,11 @@ a.rlink .go{color:var(--teal);font-weight:800;flex:none}
 #onboard .opts button{padding:16px 18px;border-radius:16px}
 #onboard .opts button b{font-size:17px}
 #onboard .opts button small{font-size:12.5px}
+#cammodal{position:fixed;inset:0;z-index:80;background:rgba(9,46,45,.8);display:flex;flex-direction:column;padding:16px}
+#cammodal .cbar{display:flex;align-items:center;gap:12px;color:#fff;padding:0 4px 12px}
+#cammodal .cbar .ct{flex:1;font-weight:700;font-size:15px}
+#cammodal .cbar a,#cammodal .cbar button{color:#fff;font-size:13px;font-weight:600}
+#cammodal iframe{width:100%;height:70vh;border:0;border-radius:12px;background:#000}
 </style>
 
 <div id="wrap">
@@ -245,6 +253,11 @@ a.rlink .go{color:var(--teal);font-weight:800;flex:none}
 </div>
 
 <div id="detail"></div>
+
+<div id="cammodal" class="hide">
+  <div class="cbar"><span class="ct" id="camtitle"></span><a id="camext" target="_blank" rel="noopener">新窗口打开 ↗</a><button id="camclose">关闭 ✕</button></div>
+  <iframe id="camframe" allow="autoplay; fullscreen"></iframe>
+</div>
 
 <div id="onboard" class="hide">
   <svg class="curve" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
@@ -290,6 +303,13 @@ const SPOTS=[
  {id:'snapper', name:'Snapper Rocks',region:'澳洲 · 黄金海岸',flag:'🇦🇺', cn:false, lat:-28.162,lon:153.550, facing:55,  lvl:'全水平', hard:false, note:'超级浪岸，世界最长右手点浪之一', season:'12–4月气旋涌季', tide:'中低潮'},
  {id:'waikiki', name:'Waikiki',      region:'美国 · 夏威夷', flag:'🇺🇸', cn:false, lat:21.271, lon:-157.822,facing:190, lvl:'新手友好', hard:false, note:'现代冲浪发源地，绵长的软浪', season:'5–9月南涌季', tide:'不敏感'},
 ];
+const AREA_OF={riyue:'wanning',houhai:'houhai',xichong:'huizhou',honghai:'shantou',shilaoren:'qingdao',fuli:'lingshui',shantoujin:'shantou',shanhaili:'huizhou',liuao:'liuao',dongsha:'zhoushan',lianghekou:'qingdao',uluwatu:'bali',canggu:'bali',cloud9:'siargao',weligama:'srilanka',ichinomiya:'chiba',snapper:'goldcoast',waikiki:'hawaii'};
+SPOTS.forEach(s=>{s.area=AREA_OF[s.id];});
+const AREAS={
+ cn:[['qingdao','青岛'],['huizhou','惠州·深惠'],['zhoushan','舟山'],['lingshui','陵水'],['wanning','万宁'],['liuao','六鳌'],['shantou','汕头·粤东'],['houhai','后海']],
+ intl:[['bali','巴厘岛'],['siargao','菲律宾·锡亚高'],['srilanka','斯里兰卡'],['chiba','日本·千叶'],['goldcoast','澳洲·黄金海岸'],['hawaii','夏威夷']],
+};
+const EMBED_OK=['balicams.com','bcm-surfpatrol.com','lankasurf.com'];
 /* 已人工+脚本双重验证的外部资源：t=名称 u=链接 cam=是否实况摄像头 n=备注 */
 const RES={
  riyue:[{t:'Surf-Forecast 浪报',u:'https://www.surf-forecast.com/breaks/Riyue-Bay',n:'免费'},{t:'Surfline 浪报',u:'https://www.surfline.com/surf-report/riyue-bay-left-point/584204204e65fad6a7709179',n:'基础免费·需订阅高级'}],
@@ -464,11 +484,25 @@ function renderSpots(){
   const views=SPOTS.map((s,i)=>compute(i)).filter(Boolean);
   const bySort=arr=>S.sort==='score'?[...arr].sort((a,b)=>(b.cur.score??-1)-(a.cur.score??-1)):arr;
   const fav=bySort(views.filter(v=>S.favs.includes(v.spot.id)));
-  const cn=bySort(views.filter(v=>v.spot.cn&&!S.favs.includes(v.spot.id)));
-  const intl=bySort(views.filter(v=>!v.spot.cn&&!S.favs.includes(v.spot.id)));
+  const cn=views.filter(v=>v.spot.cn&&!S.favs.includes(v.spot.id));
+  const intl=views.filter(v=>!v.spot.cn&&!S.favs.includes(v.spot.id));
   const grp=(title,arr)=>arr.length?`<section class="group"><h2>${title}</h2>${arr.map(card).join('')}</section>`:'';
-  const grpFold=(title,arr)=>arr.length?`<section class="group"><details><summary><h2>${title} · ${arr.length} 个浪点<span class="fold-arrow">▾</span></h2></summary>${arr.map(card).join('')}</details></section>`:'';
-  box.innerHTML=grp('⭐ 收藏',fav)+grp('🇨🇳 中国',cn)+grpFold('🌍 全球',intl);
+  const grpFold=(title,inner)=>inner?`<section class="group"><details><summary><h2>${title}<span class="fold-arrow">▾</span></h2></summary>${inner}</details></section>`:'';
+  box.innerHTML=grp('⭐ 收藏',fav)+areaBlocks(AREAS.cn,cn)+grpFold('🌍 全球',areaBlocks(AREAS.intl,intl));
+}
+function areaBlocks(defs,views){
+  const byArea=defs.map(([id,label])=>{
+    const arr=views.filter(v=>v.spot.area===id);
+    return {id,label,arr,best:arr.length?Math.max(...arr.map(v=>v.cur.score??-1)):-Infinity};
+  }).filter(a=>a.arr.length);
+  const ordered=S.sort==='score'?[...byArea].sort((a,b)=>b.best-a.best):byArea;
+  return ordered.map(a=>{
+    const sorted=[...a.arr].sort((x,y)=>(y.cur.score??-1)-(x.cur.score??-1));
+    const [top,...rest]=sorted;
+    const count=a.arr.length>1?`<span style="font-size:12px;color:var(--ink3);font-weight:400">· ${a.arr.length} 个浪点</span>`:'';
+    const more=rest.length?`<details class="area-more"><summary>该区域还有 ${rest.length} 个 ▾</summary>${rest.map(card).join('')}</details>`:'';
+    return `<div class="area-h">${a.label}${count}</div>${card(top)}${more}`;
+  }).join('');
 }
 function card(v){
   const {spot,cur}=v, r=rating(cur.score||0);
@@ -479,7 +513,7 @@ function card(v){
   return `<article class="spot" data-id="${spot.id}">
     <div class="top">
       <div class="names">
-        <div class="n">${spot.flag} ${spot.name} <span class="tag ${spot.hard?'hard':''}">${spot.lvl}</span>${(RES[spot.id]||[]).some(r=>r.cam)?'<span class="camdot" title="有实况摄像头">📷</span>':''}</div>
+        <div class="n">${spot.flag} ${spot.name} <span class="tag ${spot.hard?'hard':''}">${spot.lvl}</span></div>
         <div class="r">${spot.region}</div>
       </div>
       <button class="fav ${S.favs.includes(spot.id)?'on':''}" data-fav="${spot.id}">${S.favs.includes(spot.id)?'⭐':'☆'}</button>
@@ -489,6 +523,7 @@ function card(v){
       <span>浪高 <b>${fm(cur.size)}m</b></span>
       <span>周期 <b>${fm(cur.per,0)}s</b></span>
       <span>风 <b>${fm(cur.wspd,0)}</b>km/h ${wr?wr.t:''}</span>${cur.day?'':'<span>🌙 天没亮</span>'}
+      ${(RES[spot.id]||[]).some(r=>r.cam)?`<button class="camgo" data-cam="${spot.id}">📷 实况</button>`:''}
     </div>
     <div class="win"><span class="k">今日最佳</span><span>${win}</span></div>
   </article>`;
@@ -734,9 +769,26 @@ document.addEventListener('click',e=>{
   if(bl){ S.board.lvl=bl.dataset.blvl; save(); renderBoard(); return; }
   const bf=t.closest('[data-bfit]');
   if(bf){ S.board.fit=bf.dataset.bfit; save(); renderBoard(); return; }
+  const cg=t.closest('.camgo');
+  if(cg){ e.stopPropagation(); openCam(cg.dataset.cam); return; }
   const sp=t.closest('.spot');
   if(sp&&!t.closest('.fav')){ openDetail(sp.dataset.id); return; }
 });
+function openCam(id){
+  const cam=(RES[id]||[]).find(r=>r.cam);
+  if(!cam) return;
+  const spot=SPOTS.find(s=>s.id===id);
+  let host=''; try{ host=new URL(cam.u).hostname; }catch(e){}
+  if(EMBED_OK.some(d=>host===d||host.endsWith('.'+d))){
+    $('#camtitle').textContent=(spot?spot.name:'')+' 实况';
+    $('#camext').href=cam.u;
+    $('#camframe').src=cam.u;
+    $('#cammodal').classList.remove('hide');
+  } else {
+    window.open(cam.u,'_blank','noopener');
+  }
+}
+$('#camclose').onclick=()=>{ $('#cammodal').classList.add('hide'); $('#camframe').src=''; };
 $('#refresh').onclick=()=>load(true);
 function syncSort(){ $('#sortbtn').textContent=S.sort==='score'?'按评分 ↓':'按浪点'; }
 $('#sortbtn').onclick=()=>{ S.sort=S.sort==='score'?'default':'score'; save(); syncSort(); renderSpots(); };
